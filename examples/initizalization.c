@@ -5,11 +5,11 @@
  *
  */
 
-
 #include <stdio.h>
 #include <tevent.h>
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
     printf("INIT\n");
 
@@ -19,9 +19,8 @@ int main (int argc, char **argv) {
     mem_ctx = talloc_new(NULL); //parent
     event_ctx = tevent_context_init(mem_ctx);
 
-    talloc_free(mem_ctx);   // inotify_handler_closed will be call after this!
+    talloc_free(mem_ctx); // inotify_handler_closed will be call after this!
 
     printf("Quit\n");
     return EXIT_SUCCESS;
 }
-

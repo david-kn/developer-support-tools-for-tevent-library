@@ -9,23 +9,22 @@
  *
  */
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <tevent.h>
 
-
-
-struct foo_state {
+struct foo_state
+{
     int x;
 };
 
-struct testA {
+struct testA
+{
     int y;
 };
 
-
-static void foo_done(struct tevent_req *req) {
+static void foo_done(struct tevent_req *req)
+{
     // a->x contains 9
     struct foo_state *a = tevent_req_data(req, struct foo_state);
 
@@ -40,8 +39,8 @@ static void foo_done(struct tevent_req *req) {
     printf("c->x: %d\n", c->y);
 }
 
-
-struct tevent_req * foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *event_ctx) {
+struct tevent_req *foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *event_ctx)
+{
 
     printf("_send\n");
     struct tevent_req *req;
@@ -53,7 +52,8 @@ struct tevent_req * foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *event_c
     return req;
 }
 
- static void run(struct tevent_context *ev, struct tevent_timer *te, struct timeval current_time, void *private_data) {
+static void run(struct tevent_context *ev, struct tevent_timer *te, struct timeval current_time, void *private_data)
+{
 
     struct tevent_req *req;
     struct testA *tmp = talloc(ev, struct testA);
@@ -62,10 +62,10 @@ struct tevent_req * foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *event_c
 
     tevent_req_set_callback(req, foo_done, tmp);
     tevent_req_done(req);
-
 }
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
     printf("INIT\n");
 
@@ -75,18 +75,19 @@ int main (int argc, char **argv) {
     struct tevent_timer *time_event;
 
     mem_ctx = talloc_new(NULL); //parent
-    if(mem_ctx == NULL)
+    if (mem_ctx == NULL)
         return EXIT_FAILURE;
 
     event_ctx = tevent_context_init(mem_ctx);
-    if(event_ctx == NULL)
+    if (event_ctx == NULL)
         return EXIT_FAILURE;
 
     data = talloc(mem_ctx, struct testA);
     data->y = 10;
 
     time_event = tevent_add_timer(event_ctx, mem_ctx, tevent_timeval_current(), run, data);
-    if(time_event == NULL) {
+    if (time_event == NULL)
+    {
         fprintf(stderr, " FAILED\n");
         return EXIT_FAILURE;
     }

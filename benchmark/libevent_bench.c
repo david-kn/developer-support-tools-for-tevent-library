@@ -66,18 +66,19 @@ static int num_pipes, num_active, num_writes;
 static struct event *events;
 static int loop = 10;
 
-
 static void
 read_cb(evutil_socket_t fd, short which, void *arg)
 {
-	ev_intptr_t idx = (ev_intptr_t) arg, widx = idx + 1;
+	ev_intptr_t idx = (ev_intptr_t)arg, widx = idx + 1;
 	u_char ch;
 
-	count += recv(fd, (char*)&ch, sizeof(ch), 0);
-	if (writes) {
-		if (widx >= num_pipes) {
+	count += recv(fd, (char *)&ch, sizeof(ch), 0);
+	if (writes)
+	{
+		if (widx >= num_pipes)
+		{
 			widx -= num_pipes;
-        }
+		}
 		send(pipes[2 * widx + 1], "f", 1, 0);
 
 		writes--;
@@ -92,35 +93,38 @@ run_once(void)
 	long i;
 	static struct timeval ts, te;
 
-    gettimeofday(&ts, NULL);
-	for (cp = pipes, i = 0; i < num_pipes; i++, cp += 2) {
+	gettimeofday(&ts, NULL);
+	for (cp = pipes, i = 0; i < num_pipes; i++, cp += 2)
+	{
 		if (event_initialized(&events[i]))
 			event_del(&events[i]);
 
-		event_set(&events[i], cp[0], EV_READ | EV_PERSIST, read_cb, (void *)(ev_intptr_t) i);
+		event_set(&events[i], cp[0], EV_READ | EV_PERSIST, read_cb, (void *)(ev_intptr_t)i);
 		event_add(&events[i], NULL);
 	}
 
-	 event_loop(EVLOOP_ONCE | EVLOOP_NONBLOCK);
+	event_loop(EVLOOP_ONCE | EVLOOP_NONBLOCK);
 
 	fired = 0;
 	space = num_pipes / num_active;
 	space = space * 2;
-	for (i = 0; i < num_active; i++, fired++) {
+	for (i = 0; i < num_active; i++, fired++)
+	{
 		send(pipes[i * space + 1], "e", 1, 0);
-    }
+	}
 
 	count = 0;
 	writes = num_writes;
-	{ int xcount = 0;
-	do {
-		event_loop(EVLOOP_ONCE | EVLOOP_NONBLOCK);
-		xcount++;
-	} while (count != fired);
-	gettimeofday(&te, NULL);
+	{
+		int xcount = 0;
+		do
+		{
+			event_loop(EVLOOP_ONCE | EVLOOP_NONBLOCK);
+			xcount++;
+		} while (count != fired);
+		gettimeofday(&te, NULL);
 
-
-	// if (xcount != count) fprintf(stderr, "Xcount: %d, Rcount: %d\n", xcount, count);
+		// if (xcount != count) fprintf(stderr, "Xcount: %d, Rcount: %d\n", xcount, count);
 	}
 
 	timersub(&te, &ts, &te);
@@ -128,8 +132,7 @@ run_once(void)
 	return (&te);
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 #ifndef WIN32
 	struct rlimit rl;
@@ -145,8 +148,10 @@ main(int argc, char **argv)
 	num_pipes = 4;
 	num_active = 2;
 	num_writes = num_pipes;
-	while ((c = getopt(argc, argv, "n:a:w:")) != -1) {
-		switch (c) {
+	while ((c = getopt(argc, argv, "n:a:w:")) != -1)
+	{
+		switch (c)
+		{
 		case 'n':
 			num_pipes = atoi(optarg);
 			break;
@@ -164,7 +169,8 @@ main(int argc, char **argv)
 
 #ifndef WIN32
 	rl.rlim_cur = rl.rlim_max = num_pipes * 2 + 50;
-	if (setrlimit(RLIMIT_NOFILE, &rl) == -1) {
+	if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
+	{
 		perror("setrlimit");
 		exit(1);
 	}
@@ -172,30 +178,35 @@ main(int argc, char **argv)
 
 	events = calloc(num_pipes, sizeof(struct event));
 	pipes = calloc(num_pipes * 2, sizeof(evutil_socket_t));
-	if (events == NULL || pipes == NULL) {
+	if (events == NULL || pipes == NULL)
+	{
 		perror("malloc");
 		exit(1);
 	}
 
 	event_init();
 
-	for (cp = pipes, i = 0; i < num_pipes; i++, cp += 2) {
+	for (cp = pipes, i = 0; i < num_pipes; i++, cp += 2)
+	{
 #ifdef USE_PIPES
-		if (pipe(cp) == -1) {
+		if (pipe(cp) == -1)
+		{
 #else
-		if (evutil_socketpair(AF_UNIX, SOCK_STREAM, 0, cp) == -1) {
+		if (evutil_socketpair(AF_UNIX, SOCK_STREAM, 0, cp) == -1)
+		{
 #endif
 			perror("pipe");
 			exit(1);
 		}
 	}
 
-	for (i = 0; i < loop; i++) {
+	for (i = 0; i < loop; i++)
+	{
 		tv = run_once();
 		if (tv == NULL)
 			exit(1);
 		fprintf(stdout, "%ld\n",
-			tv->tv_sec * 1000000L + tv->tv_usec);
+				tv->tv_sec * 1000000L + tv->tv_usec);
 	}
 
 	exit(0);

@@ -10,22 +10,23 @@
 #include <unistd.h>
 #include <tevent.h>
 
- struct computation_state {
-     int local_var;
-     int x;
+struct computation_state
+{
+    int local_var;
+    int x;
 };
 
- struct juststruct {
-        TALLOC_CTX * ctx;
-        struct tevent_context *ev;
-        int y;
- };
+struct juststruct
+{
+    TALLOC_CTX *ctx;
+    struct tevent_context *ev;
+    int y;
+};
 
 int created = 0;
 
-
 static void timer_handler(struct tevent_context *ev, struct tevent_timer *te,
-                           struct timeval current_time, void *private_data)
+                          struct timeval current_time, void *private_data)
 {
     // time event which after all sets request as done. Following item from the queue  may be invoked.
     struct tevent_req *req = private_data;
@@ -40,32 +41,37 @@ static void timer_handler(struct tevent_context *ev, struct tevent_timer *te,
     tevent_req_done(req);
     talloc_free(req);
     printf("Request #%d set as done.\n", stateX->x);
-
 }
 
-static void trigger (struct tevent_req *req, void *private_data) {
+static void trigger(struct tevent_req *req, void *private_data)
+{
 
-    struct juststruct *priv = tevent_req_callback_data (req, struct juststruct);
+    struct juststruct *priv = tevent_req_callback_data(req, struct juststruct);
     struct computation_state *in = tevent_req_data(req, struct computation_state);
     struct timeval schedule;
     struct tevent_timer *tim;
     schedule = tevent_timeval_current_ofs(1, 0);
     printf("Processing request #%d\n", in->x);
 
-    if( in->x % 3 == 0) {   // just example; third request does not contain any further operation and will be finished right away.
+    if (in->x % 3 == 0)
+    { // just example; third request does not contain any further operation and will be finished right away.
         tim = NULL;
-    } else {
+    }
+    else
+    {
         tim = tevent_add_timer(priv->ev, req, schedule, timer_handler, req);
     }
 
-    if(tim == NULL) {
-            tevent_req_done(req);
-            talloc_free(req);
-            printf("Request #%d set as done.\n", in->x);
+    if (tim == NULL)
+    {
+        tevent_req_done(req);
+        talloc_free(req);
+        printf("Request #%d set as done.\n", in->x);
     }
 }
 
-struct tevent_req * foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *ev, const char *name, int num) {
+struct tevent_req *foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *ev, const char *name, int num)
+{
 
     struct tevent_req *req;
     struct computation_state *state;
@@ -74,7 +80,8 @@ struct tevent_req * foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *ev, con
 
     printf("foo_send\n");
     req = tevent_req_create(mem_ctx, &state, struct computation_state);
-    if(!req) { // check for appropriate allocation
+    if (!req)
+    { // check for appropriate allocation
         tevent_req_error(req, 1);
         return NULL;
     }
@@ -86,14 +93,18 @@ struct tevent_req * foo_send(TALLOC_CTX *mem_ctx, struct tevent_context *ev, con
     return req;
 }
 
-static void foo_done(struct tevent_req *req) {
+static void foo_done(struct tevent_req *req)
+{
 
     enum tevent_req_state state;
     uint64_t err;
-    if(tevent_req_is_error(req, &state, &err)) {
+    if (tevent_req_is_error(req, &state, &err))
+    {
         printf("ERROR WAS SET %d\n", state);
         return;
-    } else {
+    }
+    else
+    {
         /*
          * processing some stuff
          */
@@ -101,27 +112,27 @@ static void foo_done(struct tevent_req *req) {
     }
 }
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
     printf("INIT\n");
 
     TALLOC_CTX *mem_ctx;
-    struct tevent_req* req[6];
-    struct tevent_req* tmp;
+    struct tevent_req *req[6];
+    struct tevent_req *tmp;
     struct tevent_context *ev;
     struct tevent_queue *fronta = NULL;
     int ret;
     int i = 0;
 
-    const char * const names[] = {
-        "first", "second", "third", "fourth", "fifth"
-    };
-
+    const char *const names[] = {
+        "first", "second", "third", "fourth", "fifth"};
 
     mem_ctx = talloc_new(NULL); //parent
     talloc_parent(mem_ctx);
     ev = tevent_context_init(mem_ctx);
-    if (ev == NULL) {
+    if (ev == NULL)
+    {
         fprintf(stderr, "MEMORY ERROR\n");
         return EXIT_FAILURE;
     }
@@ -130,23 +141,26 @@ int main (int argc, char **argv) {
     fronta = tevent_queue_create(mem_ctx, "test_queue");
     tevent_queue_stop(fronta);
     tevent_queue_start(fronta);
-    if(tevent_queue_running(fronta)) {
-        printf ("Queue is runnning (length: %d)\n", tevent_queue_length(fronta));
-    } else {
-        printf ("Queue is not runnning\n");
+    if (tevent_queue_running(fronta))
+    {
+        printf("Queue is runnning (length: %d)\n", tevent_queue_length(fronta));
     }
-
+    else
+    {
+        printf("Queue is not runnning\n");
+    }
 
     struct juststruct *data = talloc(ev, struct juststruct);
     data->ctx = mem_ctx;
     data->ev = ev;
 
-
     // create 4 requests
-    for (i = 1; i < 5; i++) {
+    for (i = 1; i < 5; i++)
+    {
         req[i] = foo_send(mem_ctx, ev, names[i], i);
         tmp = req[i];
-        if (req[i] == NULL) {
+        if (req[i] == NULL)
+        {
             fprintf(stderr, "CHYBA!! %d \n", ret);
             break;
         }
@@ -162,7 +176,8 @@ int main (int argc, char **argv) {
 
     printf("Queue length: %d\n", tevent_queue_length(fronta));
     printf("----------------------------\n");
-    while(tevent_queue_length(fronta) > 0) {
+    while (tevent_queue_length(fronta) > 0)
+    {
         printf("_______________________\n");
         tevent_loop_once(ev);
         printf("Queue: %d items left\n", tevent_queue_length(fronta));
@@ -173,6 +188,5 @@ int main (int argc, char **argv) {
     talloc_free(mem_ctx);
     printf("FINISH\n");
 
-
-return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

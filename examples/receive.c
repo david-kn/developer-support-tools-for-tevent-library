@@ -9,29 +9,29 @@
 #include <string.h>
 #include <stdio.h>
 
-int main(int argc, char**argv)
+int main(int argc, char **argv)
 {
-   int sockfd,n;
-   struct sockaddr_in servaddr,cliaddr;
+   int sockfd, n;
+   struct sockaddr_in servaddr, cliaddr;
    socklen_t len;
    char mesg[1000];
 
-   sockfd = socket(AF_INET,SOCK_DGRAM,0);
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
-   bzero(&servaddr,sizeof(servaddr));
+   bzero(&servaddr, sizeof(servaddr));
    servaddr.sin_family = AF_INET;
-   servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
    servaddr.sin_port = htons(32100);
-   bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
+   bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
    for (;;)
    {
       len = sizeof(cliaddr);
-      n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&cliaddr,&len);
+      n = recvfrom(sockfd, mesg, 1000, 0, (struct sockaddr *)&cliaddr, &len);
       printf("Received the following:\n");
       mesg[n] = 0;
       printf("-------------------------------------------------------\n");
-      printf("%s\n",mesg);
+      printf("%s\n", mesg);
       printf("-------------------------------------------------------\n");
       sleep(1);
    }

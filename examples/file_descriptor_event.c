@@ -5,46 +5,44 @@
  *
  */
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <tevent.h>
 #include <fcntl.h>
 
- struct computation_state {
-     int local_var;
-     int fd;
- };
-
- static void handler_read(struct tevent_context *ev, struct tevent_fd *fde,
-			    uint16_t flags, void *private_data)
+struct computation_state
 {
-        struct computation_state *in = talloc_get_type(private_data, struct computation_state);
+    int local_var;
+    int fd;
+};
 
-        printf("Reading a file\n");
+static void handler_read(struct tevent_context *ev, struct tevent_fd *fde,
+                         uint16_t flags, void *private_data)
+{
+    struct computation_state *in = talloc_get_type(private_data, struct computation_state);
 
-        char txt[100] = {0};  // CLEAR array
+    printf("Reading a file\n");
 
-        read(in->fd, txt, 100);  // read from file descriptor
-        printf("------------------\n");
-	    printf("%s\n", txt);
-	    printf("------------------\n");
+    char txt[100] = {0}; // CLEAR array
+
+    read(in->fd, txt, 100); // read from file descriptor
+    printf("------------------\n");
+    printf("%s\n", txt);
+    printf("------------------\n");
 }
-
 
 // ran after the socket is freed
 static void handler_closed(struct tevent_context *ev, struct tevent_fd *fde,
-			    int fd, void *private_data)
+                           int fd, void *private_data)
 {
-        struct computation_state *in = talloc_get_type(private_data, struct computation_state);
-        in->local_var = 10;
+    struct computation_state *in = talloc_get_type(private_data, struct computation_state);
+    in->local_var = 10;
 
-        printf("File descriptor closed.\n");
-
+    printf("File descriptor closed.\n");
 }
 
-
-int main (int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
     printf("INIT\n");
 
@@ -67,17 +65,17 @@ int main (int argc, char **argv) {
     in->fd = fd;
 
     fde = tevent_add_fd(event_ctx, mem_ctx, fd, TEVENT_FD_READ, handler_read, in);
-    if(fde == NULL) {
+    if (fde == NULL)
+    {
         printf("MEMORY ERROR\n");
     }
-    tevent_fd_set_close_fn(fde, handler_closed);    // set a handler to be called when the context is freed!
+    tevent_fd_set_close_fn(fde, handler_closed); // set a handler to be called when the context is freed!
 
     tevent_loop_once(event_ctx);
 
     close(fd);
-    talloc_free(mem_ctx);   // handler_read will be call after this!
+    talloc_free(mem_ctx); // handler_read will be call after this!
 
     printf("Quit\n");
     return EXIT_SUCCESS;
 }
-

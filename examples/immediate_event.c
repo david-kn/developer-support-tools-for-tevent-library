@@ -5,25 +5,27 @@
  *
  */
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <tevent.h>
 #include <sys/time.h>
 
- struct info_struct {
-     int counter;
- };
+struct info_struct
+{
+    int counter;
+};
 
- static void foo(struct tevent_context *ev, struct tevent_immediate *im, void *private_data) {
+static void foo(struct tevent_context *ev, struct tevent_immediate *im, void *private_data)
+{
 
-        printf("--------\n");
-        printf("Callback\n");
-        struct info_struct *data = talloc_get_type(private_data, struct info_struct);
-        printf("Data value: %d\n", data->counter);
+    printf("--------\n");
+    printf("Callback\n");
+    struct info_struct *data = talloc_get_type(private_data, struct info_struct);
+    printf("Data value: %d\n", data->counter);
 }
 
-int main (void) {
+int main(void)
+{
 
     printf("INIT\n");
 
@@ -38,14 +40,14 @@ int main (void) {
     struct info_struct *data = talloc(mem_ctx, struct info_struct);
     struct info_struct *data2 = talloc(mem_ctx, struct info_struct);
 
-
     //  setting up private data
     data->counter = 1;
     data2->counter = 2;
 
     // first immediate event
     im = tevent_create_immediate(mem_ctx);
-    if(im == NULL) {
+    if (im == NULL)
+    {
         fprintf(stderr, "FAILED\n");
         return EXIT_FAILURE;
     }
@@ -53,7 +55,8 @@ int main (void) {
 
     // second immediate event
     im2 = tevent_create_immediate(mem_ctx);
-    if(im == NULL) {
+    if (im == NULL)
+    {
         fprintf(stderr, "FAILED\n");
         return EXIT_FAILURE;
     }

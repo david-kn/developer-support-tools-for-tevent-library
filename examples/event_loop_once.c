@@ -10,20 +10,19 @@
  * would process all 3 time events.
  */
 
-
 #include <stdio.h>
 #include <tevent.h>
 
-
- static void handler(struct tevent_context *ev, struct tevent_timer *tim,
-			    struct timeval current_time, void *private_data)
+static void handler(struct tevent_context *ev, struct tevent_timer *tim,
+                    struct timeval current_time, void *private_data)
 {
-        int *num = (int*) private_data;
-        printf("\thandler was called %d time.\n", *num);
-        (*num)++;
+    int *num = (int *)private_data;
+    printf("\thandler was called %d time.\n", *num);
+    (*num)++;
 }
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
     printf("INIT\n");
 
@@ -36,7 +35,6 @@ int main (int argc, char **argv) {
     mem_ctx = talloc_new(NULL); //parent
     event_ctx = tevent_context_init(mem_ctx);
 
-
     printf("Create time event...\n");
     now = tevent_timeval_current();
 
@@ -45,11 +43,11 @@ int main (int argc, char **argv) {
     tim2 = tevent_add_timer(event_ctx, mem_ctx, tevent_timeval_add(&now, 2, 0), handler, &cnt);
     tim3 = tevent_add_timer(event_ctx, mem_ctx, tevent_timeval_add(&now, 3, 0), handler, &cnt);
 
-    if(tim1 == NULL || tim2 == NULL || tim3 == NULL) {
+    if (tim1 == NULL || tim2 == NULL || tim3 == NULL)
+    {
         fprintf(stderr, " FAILED\n");
         return EXIT_FAILURE;
     }
-
 
     printf("tevent_loop_wait()\n");
     printf("------------------\n");
@@ -61,5 +59,5 @@ int main (int argc, char **argv) {
     printf("------------------\n");
     printf("QUIT\n");
 
-return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
