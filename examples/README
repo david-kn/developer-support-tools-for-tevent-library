@@ -1,0 +1,58 @@
+David Koňař (xkona07@stud.fit.vutbr.cz)
+
+
+1. PREPERATION
+	
+To compile and run all the examples, libraries talloc and tevent are required. If tevent and talloc are not currently 	installed on your system, it is possible to get tevent package (containing talloc library as well) from project website:  
+	- http://tevent.samba.org/ OR
+	- use script install.sh  placed in this folder (uses yum application for installing missing packages) OR
+	- use the package manager offered by your OS.
+		
+1.1 USAGE OF SCRIPT 'INSTAL.SH'
+		
+Script has to be launched with root privileges. Installing tevent library depence on other packages whose absence in the OS might lead to unsuccessful operation (common example of package which is not presented natively in e.g Ubuntu is python-dev but it is necessary to successfully complete the installation process of tevent. If there is such an error during tevent installation, please follow the error output and install missing dependencies.	
+	
+
+
+2. COMPILATION
+
+All files can be compiled by typing:
+gcc <file> -o <output> -ggdb -std=c99 -Wno-unused-parameter -Wno-implicit -pedantic -ltalloc -ltevent
+
+
+
+3. DESCRIPTION OF EXAMPLES
+
+List of examples:
+		*accessing_data.c
+			-  shows different attitudes and possibilites to access internal data
+
+		*event_loop_once.c
+			-  example of tevent loop 
+		
+		*event_loop_wait.c
+			-  example of tevent loop 
+		
+		*immediate_event.c
+			- shows setting of immediate event
+		
+		*initialization.c
+			-	shows just the simpliest allocation of memory and initialization. Nothing more.	
+		
+		*file_descriptor_event.c
+			- shows setting of file descriptor event
+			
+		*receive.c
+			- after start, program waits for incoming data on port 32100
+		
+		*send.c
+			- after start, program waits for STDIN input which is sent to 127.0.0.1:32000
+		
+		*signal_event.c
+			- example of signal event                                           	
+		
+		*subrequest.c
+			- Complex example of subrequest which are interconnected. This application works together with 'send' and 	'receive' which are essential to see the ability of program. Starting those two other programs before 'subrequest' itself is recommended. Then type web address, e.g. google.com into stdin of 'send'. After that it is possible to see that 'subrequest' process this event and incoming data. At last, the information which represents result are passed by to port 32100 (listener for result represents 'receive' program). For more information, please read  comment in the file itself.	
+		
+		*time_event.c
+			- introduce time events which have time out limit and are repeated

@@ -1,0 +1,7 @@
+David Koňař (xkona07@stud.fit.vutbr.cz)
+
+For compiling source codes of benchmarks it is necessary to have installed appropriate packages - tevent, libevent and libev libraries. The fact, that that compilation did not end up with an error does not mean that the output of compiler will be possible to launch and test. Libraries need their depencies which represents also dev packages (e.g libev-dev, libevent-dev).
+
+These libraries have conflicts between themselves and therefore it is essential to compile the library whose packages we have installed and are prepared. After compilation uninstall conflicting packages and install packages for the second library so it can be compiled and ran as well (this is valid for conflict between libev and libevent).
+
+The package essential for compiling libevent_bench.c is 'libevent-dbg' which on the other hand causes failure when launching libev_bench. For compiling libev_bench.c with no problems, package 'libev-libevent-dev' might is required (tested on Ubuntu 12.04) but it cause conflict with aforementioned package libevent-dbg which have to be removed first.
